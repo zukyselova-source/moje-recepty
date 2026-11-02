@@ -1,10 +1,330 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff8ef"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Moje recepty"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="style.css"><title>Moje recepty</title></head>
-<body><header><div><small>MOJE KUCHAŘKA</small><h1>Moje recepty</h1></div><button class="round" id="settingsBtn" aria-label="Nastavení">⋯</button></header>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff8ef">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Moje recepty">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css?v=2">
+
+  <title>Moje recepty</title>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <small>MOJE KUCHAŘKA</small>
+    <h1>Moje recepty</h1>
+  </div>
+
+  <button class="round" id="settingsBtn" aria-label="Nastavení">⋯</button>
+</header>
+
 <main>
-<section id="home" class="view active"><div class="search"><span>⌕</span><input id="search" placeholder="Hledat recept nebo ingredienci…"></div><button class="primary" id="newBtn">＋ Přidat recept</button><div class="quick"><button data-filter="fav">⭐<b>Oblíbené</b><span id="favCount">0 receptů</span></button><button data-filter="try">🧪<b>Chci vyzkoušet</b><span id="tryCount">0 receptů</span></button></div><div class="sectionTitle"><h2>Sekce</h2><button id="addSectionBtn">Upravit</button></div><div id="sections" class="sections"></div><div class="sectionTitle"><h2>Poslední recepty</h2></div><div id="recent" class="cards"></div><div id="empty" class="empty"><div>🍲</div><b>Zatím tu nic není</b><p>Přidej svůj první recept s fotkou.</p></div></section>
-<section id="list" class="view"><div class="bar"><button class="back">‹</button><h2 id="listTitle"></h2><button class="round" id="listAdd">＋</button></div><div id="listCards" class="cards"></div></section>
-<section id="detail" class="view"><div class="bar overlay"><button class="back">‹</button><button class="round" id="editBtn">✎</button></div><img id="detailImg" class="hero"><div class="detailBody"><div class="titleRow"><div><span id="detailSection" class="pill"></span><h1 id="detailTitle"></h1></div><button id="favBtn" class="star">☆</button></div><div class="meta" id="detailStatus"></div><article><h3>Ingredience</h3><div id="detailIngredients"></div><h3>Postup</h3><div id="detailSteps"></div><div id="noteWrap"><h3>Moje poznámka</h3><div id="detailNote" class="note"></div></div><a id="detailSource" target="_blank" rel="noopener">🔗 Otevřít původní recept</a></article></div></section>
-<section id="form" class="view"><div class="bar"><button class="back">Zrušit</button><h2 id="formTitle">Nový recept</h2><button id="saveBtn" class="save">Uložit</button></div><form id="recipeForm"><label class="photo"><input id="photo" type="file" accept="image/*"><img id="preview"><span id="photoHint">📷<br><b>Přidat fotografii</b></span></label><label>Název receptu<input id="name" required placeholder="Např. Kulajda"></label><label>Sekce<select id="section"></select></label><div class="checks"><label><input id="favorite" type="checkbox"> ⭐ Oblíbený</label><label><input id="wantTry" type="checkbox"> 🧪 Chci vyzkoušet</label></div><label>Ingredience<textarea id="ingredients" rows="8" placeholder="Každou ingredienci napiš na nový řádek"></textarea></label><label>Postup<textarea id="steps" rows="10" placeholder="Napiš postup krok za krokem"></textarea></label><label>Moje poznámka<textarea id="note" rows="3" placeholder="Co příště změnit?"></textarea></label><label>Zdroj / odkaz<input id="source" type="url" inputmode="url" placeholder="https://…"></label><button type="button" class="danger" id="deleteBtn">Smazat recept</button></form></section>
-<section id="settings" class="view"><div class="bar"><button class="back">‹</button><h2>Nastavení</h2><span></span></div><div class="settings"><h3>Sekce</h3><div id="sectionEditor"></div><button class="secondary" id="newSection">＋ Přidat sekci</button><h3>Záloha</h3><p>Export uloží recepty i fotografie do jednoho souboru. Ten můžeš později znovu načíst.</p><button class="secondary" id="exportBtn">Exportovat zálohu</button><label class="secondary import">Importovat zálohu<input id="importFile" type="file" accept="application/json"></label></div></section>
-</main><div id="toast"></div><script src="app.js"></script></body></html>
+
+  <section id="home" class="view active">
+
+    <div class="search">
+      <span>⌕</span>
+      <input id="search" placeholder="Hledat recept nebo ingredienci…">
+    </div>
+
+    <button class="primary" id="newBtn">
+      ＋ Přidat recept
+    </button>
+
+    <div class="quick">
+
+      <button data-filter="fav">
+        ⭐
+        <b>Oblíbené</b>
+        <span id="favCount">0 receptů</span>
+      </button>
+
+      <button data-filter="try">
+        🧪
+        <b>Chci vyzkoušet</b>
+        <span id="tryCount">0 receptů</span>
+      </button>
+
+    </div>
+
+    <div class="sectionTitle">
+      <h2>Sekce</h2>
+      <button id="addSectionBtn">Upravit</button>
+    </div>
+
+    <div id="sections" class="sections"></div>
+
+    <div class="sectionTitle">
+      <h2>Poslední recepty</h2>
+    </div>
+
+    <div id="recent" class="cards"></div>
+
+    <div id="empty" class="empty">
+      <div>🍲</div>
+      <b>Zatím tu nic není</b>
+      <p>Přidej svůj první recept s fotkou.</p>
+    </div>
+
+  </section>
+
+
+  <section id="list" class="view">
+
+    <div class="bar">
+      <button class="back">‹</button>
+      <h2 id="listTitle"></h2>
+      <button class="round" id="listAdd">＋</button>
+    </div>
+
+    <div id="listCards" class="cards"></div>
+
+  </section>
+
+
+  <section id="detail" class="view">
+
+    <div class="bar overlay">
+      <button class="back">‹</button>
+      <button class="round" id="editBtn">✎</button>
+    </div>
+
+    <img id="detailImg" class="hero">
+
+    <div class="detailBody">
+
+      <div class="titleRow">
+
+        <div>
+          <span id="detailSection" class="pill"></span>
+          <h1 id="detailTitle"></h1>
+        </div>
+
+        <button id="favBtn" class="star">☆</button>
+
+      </div>
+
+      <div class="meta" id="detailStatus"></div>
+
+      <article>
+
+        <h3>Ingredience</h3>
+        <div id="detailIngredients"></div>
+
+        <h3>Postup</h3>
+        <div id="detailSteps"></div>
+
+        <div id="noteWrap">
+          <h3>Moje poznámka</h3>
+          <div id="detailNote" class="note"></div>
+        </div>
+
+        <a id="detailSource" target="_blank" rel="noopener">
+          🔗 Otevřít původní recept
+        </a>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <section id="form" class="view">
+
+    <div class="bar">
+      <button class="back">Zrušit</button>
+      <h2 id="formTitle">Nový recept</h2>
+      <button id="saveBtn" class="save">Uložit</button>
+    </div>
+
+    <form id="recipeForm">
+
+      <label>
+        📋 Rychlé vložení receptu
+
+        <textarea
+          id="quickPaste"
+          rows="9"
+          placeholder="Sem vlož celý zkopírovaný recept z Instagramu, Facebooku nebo webu…"></textarea>
+      </label>
+
+      <button type="button" class="secondary" id="parseRecipeBtn">
+        Rozdělit text do polí
+      </button>
+
+      <p id="parseHint"
+         style="margin-top:-2px;color:#786f66;font-size:.9rem">
+        Nejlépe funguje, když text obsahuje nadpisy „Ingredience“ a „Postup“.
+      </p>
+
+
+      <label class="photo">
+
+        <input
+          id="photo"
+          type="file"
+          accept="image/*">
+
+        <img id="preview">
+
+        <span id="photoHint">
+          📷
+          <br>
+          <b>Přidat fotografii</b>
+        </span>
+
+      </label>
+
+
+      <label>
+        Název receptu
+
+        <input
+          id="name"
+          required
+          placeholder="Např. Kulajda">
+      </label>
+
+
+      <label>
+        Sekce
+        <select id="section"></select>
+      </label>
+
+
+      <div class="checks">
+
+        <label>
+          <input id="favorite" type="checkbox">
+          ⭐ Oblíbený
+        </label>
+
+        <label>
+          <input id="wantTry" type="checkbox">
+          🧪 Chci vyzkoušet
+        </label>
+
+      </div>
+
+
+      <label>
+        Ingredience
+
+        <textarea
+          id="ingredients"
+          rows="8"
+          placeholder="Každou ingredienci napiš na nový řádek"></textarea>
+      </label>
+
+
+      <label>
+        Postup
+
+        <textarea
+          id="steps"
+          rows="10"
+          placeholder="Napiš postup krok za krokem"></textarea>
+      </label>
+
+
+      <label>
+        Moje poznámka
+
+        <textarea
+          id="note"
+          rows="3"
+          placeholder="Co příště změnit?"></textarea>
+      </label>
+
+
+      <label>
+        Zdroj / odkaz
+
+        <input
+          id="source"
+          type="url"
+          inputmode="url"
+          placeholder="https://…">
+      </label>
+
+
+      <button
+        type="button"
+        class="danger"
+        id="deleteBtn">
+        Smazat recept
+      </button>
+
+    </form>
+
+  </section>
+
+
+  <section id="settings" class="view">
+
+    <div class="bar">
+      <button class="back">‹</button>
+      <h2>Nastavení</h2>
+      <span></span>
+    </div>
+
+    <div class="settings">
+
+      <h3>Sekce</h3>
+
+      <div id="sectionEditor"></div>
+
+      <button
+        class="secondary"
+        id="newSection">
+        ＋ Přidat sekci
+      </button>
+
+
+      <h3>Záloha</h3>
+
+      <p>
+        Export uloží recepty i fotografie do jednoho souboru.
+        Ten můžeš později znovu načíst.
+      </p>
+
+      <button
+        class="secondary"
+        id="exportBtn">
+        Exportovat zálohu
+      </button>
+
+
+      <label class="secondary import">
+
+        Importovat zálohu
+
+        <input
+          id="importFile"
+          type="file"
+          accept="application/json">
+
+      </label>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<div id="toast"></div>
+
+<script src="app.js?v=2"></script>
+
+</body>
+</html>
