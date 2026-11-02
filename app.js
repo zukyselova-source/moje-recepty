@@ -1,17 +1,74 @@
-const DEFAULT=[['🍳','Snídaně'],['🥖','Pomazánky'],['🍲','Polévky'],['🍽️','Hlavní jídla'],['🥗','Saláty'],['🍝','Těstoviny'],['🥔','Přílohy'],['🍰','Moučníky a dezerty'],['🥐','Pečení'],['🫙','Omáčky, dipy a dresinky'],['🥤','Nápoje'],['📁','Ostatní']];
-let data=JSON.parse(localStorage.getItem('mojeRecepty')||'null')||{sections:DEFAULT,recipes:[]};let current=null,filter=null,photoData='';
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];const save=()=>localStorage.setItem('mojeRecepty',JSON.stringify(data));
-function show(id){$$('.view').forEach(v=>v.classList.remove('active'));$('#'+id).classList.add('active');scrollTo(0,0)}function toast(t){let x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1600)}
-function plural(n){return n===1?'1 recept':n<5?n+' recepty':n+' receptů'}function placeholder(){return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="350"><rect width="100%" height="100%" fill="#eee3d7"/><text x="50%" y="54%" text-anchor="middle" font-size="80">🍴</text></svg>`)}
-function renderHome(){let q=$('#search').value.toLowerCase().trim();let rec=data.recipes.filter(r=>!q||[r.name,r.ingredients,r.steps,r.note].join(' ').toLowerCase().includes(q));$('#sections').innerHTML=data.sections.map(([e,n])=>`<button class="sectionCard" data-section="${esc(n)}">${e}<b>${esc(n)}</b><span>${plural(data.recipes.filter(r=>r.section===n).length)}</span></button>`).join('');$('#recent').innerHTML=rec.slice().sort((a,b)=>b.updated-a.updated).slice(0,6).map(card).join('');$('#empty').style.display=data.recipes.length?'none':'block';$('#favCount').textContent=plural(data.recipes.filter(r=>r.favorite).length);$('#tryCount').textContent=plural(data.recipes.filter(r=>r.wantTry).length);bindCards();$$('[data-section]').forEach(b=>b.onclick=()=>openList('section',b.dataset.section));}
-function card(r){return `<div class="card" data-id="${r.id}"><img src="${r.photo||placeholder()}">${r.favorite?'<span class="badge">⭐</span>':''}<div><b>${esc(r.name)}</b><small>${esc(r.section)}</small></div></div>`}function bindCards(){$$('.card').forEach(c=>c.onclick=()=>openDetail(c.dataset.id))}
-function openList(type,val){filter=[type,val];$('#listTitle').textContent=type==='section'?val:type==='fav'?'Oblíbené':'Chci vyzkoušet';let rs=data.recipes.filter(r=>type==='section'?r.section===val:type==='fav'?r.favorite:r.wantTry);$('#listCards').innerHTML=rs.map(card).join('')||'<div class="empty" style="display:block;grid-column:1/-1"><div>🍽️</div><p>V této sekci zatím nic není.</p></div>';bindCards();show('list')}
-function openDetail(id){current=data.recipes.find(r=>r.id===id);if(!current)return;$('#detailImg').src=current.photo||placeholder();$('#detailTitle').textContent=current.name;$('#detailSection').textContent=current.section;$('#detailIngredients').textContent=current.ingredients||'Neuvedeno';$('#detailSteps').textContent=current.steps||'Neuvedeno';$('#detailNote').textContent=current.note;$('#noteWrap').style.display=current.note?'block':'none';$('#detailSource').style.display=current.source?'block':'none';$('#detailSource').href=current.source||'#';$('#favBtn').textContent=current.favorite?'★':'☆';$('#detailStatus').textContent=current.wantTry?'🧪 Chci vyzkoušet':'✓ Uloženo v kuchařce';show('detail')}
-function fillSections(sel){sel.innerHTML=data.sections.map(([e,n])=>`<option>${e} ${esc(n)}</option>`).join('')}function cleanSection(v){return v.replace(/^\S+\s/,'')}
-function openForm(r=null){current=r;photoData=r?.photo||'';$('#formTitle').textContent=r?'Upravit recept':'Nový recept';fillSections($('#section'));$('#name').value=r?.name||'';$('#section').value=data.sections.map(x=>x[0]+' '+x[1]).find(x=>cleanSection(x)===(r?.section||data.sections[0][1]));$('#favorite').checked=!!r?.favorite;$('#wantTry').checked=!!r?.wantTry;$('#ingredients').value=r?.ingredients||'';$('#steps').value=r?.steps||'';$('#note').value=r?.note||'';$('#source').value=r?.source||'';$('#preview').src=photoData||'';$('#preview').style.display=photoData?'block':'none';$('#photoHint').style.display=photoData?'none':'block';$('#deleteBtn').style.display=r?'block':'none';show('form')}
-$('#recipeForm').onsubmit=e=>e.preventDefault();$('#saveBtn').onclick=()=>{let name=$('#name').value.trim();if(!name){toast('Doplň název receptu');return}let r={id:current?.id||crypto.randomUUID(),name,section:cleanSection($('#section').value),favorite:$('#favorite').checked,wantTry:$('#wantTry').checked,ingredients:$('#ingredients').value.trim(),steps:$('#steps').value.trim(),note:$('#note').value.trim(),source:$('#source').value.trim(),photo:photoData,updated:Date.now()};let i=data.recipes.findIndex(x=>x.id===r.id);i>=0?data.recipes[i]=r:data.recipes.push(r);save();renderHome();openDetail(r.id);toast('Recept uložen')};
-$('#photo').onchange=e=>{let f=e.target.files[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{photoData=rd.result;$('#preview').src=photoData;$('#preview').style.display='block';$('#photoHint').style.display='none'};rd.readAsDataURL(f)};
-$('#deleteBtn').onclick=()=>{if(current&&confirm('Opravdu smazat tento recept?')){data.recipes=data.recipes.filter(r=>r.id!==current.id);save();renderHome();show('home')}};$('#newBtn').onclick=()=>openForm();$('#listAdd').onclick=()=>openForm();$('#editBtn').onclick=()=>openForm(current);$('#favBtn').onclick=()=>{current.favorite=!current.favorite;save();openDetail(current.id);renderHome()};$('#search').oninput=renderHome;$$('.back').forEach(b=>b.onclick=()=>{renderHome();show('home')});$$('[data-filter]').forEach(b=>b.onclick=()=>openList(b.dataset.filter));$('#settingsBtn').onclick=$('#addSectionBtn').onclick=()=>{renderSettings();show('settings')};
-function renderSettings(){$('#sectionEditor').innerHTML=data.sections.map((x,i)=>`<div class="editorRow"><input data-i="${i}" value="${esc(x[0]+' '+x[1])}"><button data-del="${i}">Smazat</button></div>`).join('');$$('[data-i]').forEach(i=>i.onchange=()=>{let old=data.sections[+i.dataset.i][1],v=i.value.trim(),p=v.indexOf(' ');data.sections[+i.dataset.i]=[p>0?v.slice(0,p):'📁',p>0?v.slice(p+1):v];data.recipes.forEach(r=>{if(r.section===old)r.section=data.sections[+i.dataset.i][1]});save()});$$('[data-del]').forEach(b=>b.onclick=()=>{if(data.sections.length<=1)return;let old=data.sections[+b.dataset.del][1];if(data.recipes.some(r=>r.section===old)){toast('Sekce obsahuje recepty');return}data.sections.splice(+b.dataset.del,1);save();renderSettings()})}
-$('#newSection').onclick=()=>{data.sections.push(['📁','Nová sekce']);save();renderSettings()};$('#exportBtn').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='moje-recepty-zaloha.json';a.click()};$('#importFile').onchange=e=>{let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x.sections||!x.recipes)throw 0;data=x;save();renderHome();toast('Záloha načtena')}catch{toast('Neplatný soubor')}};rd.readAsText(e.target.files[0])};
-function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}renderHome();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+const DEFAULT=[
+  ['🍳','Snídaně'],
+  ['🥖','Pomazánky'],
+  ['🍲','Polévky'],
+  ['🍽️','Hlavní jídla'],
+  ['🥗','Saláty'],
+  ['🍝','Těstoviny'],
+  ['🥔','Přílohy'],
+  ['🍰','Moučníky a dezerty'],
+  ['🥐','Pečení'],
+  ['🫙','Omáčky, dipy a dresinky'],
+  ['🥤','Nápoje'],
+  ['📁','Ostatní']
+];
+
+let data =
+  JSON.parse(localStorage.getItem('mojeRecepty') || 'null') ||
+  {sections:DEFAULT,recipes:[]};
+
+let current=null;
+let filter=null;
+let photoData='';
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
+const save=()=>
+  localStorage.setItem('mojeRecepty',JSON.stringify(data));
+
+
+function show(id){
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  scrollTo(0,0);
+}
+
+
+function toast(t){
+  let x=$('#toast');
+  x.textContent=t;
+  x.classList.add('show');
+  setTimeout(()=>x.classList.remove('show'),1600);
+}
+
+
+function plural(n){
+  return n===1
+    ? '1 recept'
+    : n<5
+      ? n+' recepty'
+      : n+' receptů';
+}
+
+
+function placeholder(){
+  return 'data:image/svg+xml,'+
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="350">
+        <rect width="100%" height="100%" fill="#eee3d7"/>
+        <text x="50%" y="54%" text-anchor="middle" font-size="80">🍴</text>
+      </svg>`
+    );
+}
+
+
+function renderHome(){
+
+  let q=$('#search').value.toLowerCase().trim();
+
+  let rec=data.recipes.filter(r=>
+    !q ||
+    [r.name,r.ingredients,r.steps,r.note]
+      .join(' ')
+      .toLowerCase()
